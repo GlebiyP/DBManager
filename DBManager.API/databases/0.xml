@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Database>
+  <Name>testDB1</Name>
+  <Table>
+    <Name>testTable1</Name>
+    <Column>
+      <Name>testCol1</Name>
+      <Type>string</Type>
+    </Column>
+    <Column>
+      <Name>testCol2</Name>
+      <Type>string</Type>
+    </Column>
+    <Row>
+      <Id>0</Id>
+      <Item>testVal1</Item>
+      <Item></Item>
+    </Row>
+    <Row>
+      <Id>1</Id>
+      <Item>testVal2</Item>
+      <Item>testVal3</Item>
+    </Row>
+  </Table>
+</Database>
