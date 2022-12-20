@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using DBManager.Models;
 using DBManager.Services;
+using DBManager.API.Hateoas.LinkGetters;
+using DBManager.API.Hateoas;
 
 namespace DBManager.API.Controllers
 {
@@ -9,11 +11,13 @@ namespace DBManager.API.Controllers
     [ApiController]
     public class DatabasesController : ControllerBase
     {
-        private IDBManagerService _service;
+        private readonly IDBManagerService _service;
+        private readonly DbLinkGetter _dbLinkGetter;
 
-        public DatabasesController(IDBManagerService service)
+        public DatabasesController(IDBManagerService service, DbLinkGetter dbLinkGetter)
         {
             _service = service;
+            _dbLinkGetter = dbLinkGetter;
         }
 
         [HttpGet]
@@ -23,7 +27,9 @@ namespace DBManager.API.Controllers
 
             if(!databases.Any()) return NotFound();
 
-            return Ok(databases);
+            var res = databases.Select(db => new LinkWrapper<string>(db, _dbLinkGetter.GetLinks(db)));
+
+            return Ok(res);
         }
 
         [HttpPost("{dbName}")]

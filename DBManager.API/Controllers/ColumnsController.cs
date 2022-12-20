@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using DBManager.Models;
 using DBManager.Services;
+using DBManager.API.Hateoas.LinkGetters;
+using DBManager.API.Hateoas;
 
 namespace DBManager.API.Controllers
 {
@@ -10,10 +12,12 @@ namespace DBManager.API.Controllers
     public class ColumnsController : ControllerBase
     {
         private IDBManagerService _service;
+        private readonly ColumnLinkGetter _columnLinkGetter;
 
-        public ColumnsController(IDBManagerService service)
+        public ColumnsController(IDBManagerService service, ColumnLinkGetter columnLinkGetter)
         {
             _service = service;
+            _columnLinkGetter = columnLinkGetter;
         }
 
         [HttpGet("{columnName}")]
@@ -25,7 +29,9 @@ namespace DBManager.API.Controllers
 
                 if(column == null) return NotFound();
 
-                return Ok(column);
+                var res = new LinkWrapper<Column>(column, _columnLinkGetter.GetLinks(dbName, tableName, column.Name));
+
+                return Ok(res);
             }
             catch(ArgumentException)
             {

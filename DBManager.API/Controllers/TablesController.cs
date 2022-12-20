@@ -1,4 +1,6 @@
-﻿using DBManager.Models;
+﻿using DBManager.API.Hateoas;
+using DBManager.API.Hateoas.LinkGetters;
+using DBManager.Models;
 using DBManager.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,23 +12,27 @@ namespace DBManager.API.Controllers
     public class TablesController : ControllerBase
     {
         private IDBManagerService _service;
+        private readonly TableLinkGetter _tableLinkGetter;
 
-        public TablesController(IDBManagerService service)
+        public TablesController(IDBManagerService service, TableLinkGetter tableLinkGetter)
         {
             _service = service;
+            _tableLinkGetter = tableLinkGetter;
         }
 
         [HttpGet]
         public IActionResult Get(string dbName)
         {
-            var tables = _service.GetTables(dbName);
+            var tables = _service.GetTableNames(dbName);
 
             if(!tables.Any()) 
             {
                 return NotFound();
             }
 
-            return Ok(tables);
+            var res = tables.Select(table => new LinkWrapper<string>(table, _tableLinkGetter.GetLinks(dbName, table)));
+
+            return Ok(res);
         }
 
         [HttpGet("{tableName}")]
@@ -38,7 +44,9 @@ namespace DBManager.API.Controllers
 
                 if(table is null) return NotFound();
 
-                return Ok(table);
+                var res = new LinkWrapper<Table>(table, _tableLinkGetter.GetLinks(dbName, table.Name));
+
+                return Ok(res);
             }
             catch(ArgumentException)
             {
